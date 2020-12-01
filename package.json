@@ -17,6 +17,9 @@
   },
   "homepage": "https://github.com/Estorian/myFlix-client#readme",
   "dependencies": {
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "axios": "^0.21.0",
     "core-js": "^3.7.0",
     "dom": "0.0.3",
     "react": "^17.0.1",
