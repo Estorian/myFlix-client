@@ -1,9 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\dist",
-    "\\src"
+    "\\src",
+    "\\src\\components"
   ],
-  "SelectedNode": "\\dist\\src.78399e21.css",
+  "SelectedNode": "\\package.json",
   "PreviewInSolutionExplorer": false
 }
