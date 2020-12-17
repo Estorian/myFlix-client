@@ -7,8 +7,9 @@
     "\\src\\components\\main-view",
     "\\src\\components\\movie-card",
     "\\src\\components\\movie-view",
+    "\\src\\components\\nav-menu",
     "\\src\\components\\registration-view"
   ],
-  "SelectedNode": "\\src\\components\\registration-view\\registration-view.jsx",
+  "SelectedNode": "\\src\\components\\movie-card\\movie-card.scss",
   "PreviewInSolutionExplorer": false
 }

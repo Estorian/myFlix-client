@@ -1,0 +1,17 @@
+$dark: #354359;
+$light: #DBF0FF;
+
+
+.movie-poster {
+    display: block;
+    margin: 10px auto;
+}
+
+.m-label {
+    font-weight: 700;
+}
+
+.dark {
+    background-color: $dark;
+    color: $light;
+}

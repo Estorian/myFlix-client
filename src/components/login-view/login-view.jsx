@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { RegistrationView } from '../registration-view/registration-view';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import './login-view.scss';
 
 export function LoginView(props) {
     const [username, setUsername] = useState('');
@@ -18,17 +21,27 @@ export function LoginView(props) {
     }
 
     return (
-        <form>
-            <label>
-                Username:
-                <input type="text" value={username} onChange={e => setUsername(e.target.value)} />
-            </label>
-            <label>
-                Password:
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
-            </label>
-            <button type="button" onClick={handleSubmit}>Submit</button>
-            <button type="button" onClick={ register }>Register</button>
-        </form>
+        <Modal.Dialog className="login-view">
+            <Modal.Header className="login-view">
+                <Modal.Title>Welcome to Jason's MyFlix App</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="login-view">
+                <p>Please login or register a new account</p>
+                <Form>
+                    <Form.Group controlId="formBasicUsername">
+                        <Form.Label>Username:</Form.Label>
+                        <Form.Control type="text" placeholder="Enter username" value={username} onChange={e => setUsername(e.target.value)} />
+                    </Form.Group>
+                    <Form.Group controlId="formBasicPassword">
+                        <Form.Label>Password:</Form.Label>
+                        <Form.Control type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+                    </Form.Group>
+                </Form>
+            </Modal.Body>
+            <Modal.Footer className="login-view">
+                <Button type="button" className="dark" onClick={handleSubmit}>Submit</Button>
+                <Button type="button" variant="link" onClick={register}>Register</Button>
+            </Modal.Footer>
+        </Modal.Dialog>
     )
 }

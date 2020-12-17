@@ -1,5 +1,53 @@
-.my-flix {
-  color: steelblue;
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap");
+body {
+  font-family: "Lato", sans-serif;
+  background: #354359;
+}
+.login-view {
+  background-color: #DBF0FF;
+}
+
+.dark {
+  background-color: #354359;
+  color: #DBF0FF;
+}
+.movie-card {
+  width: 20rem;
+  height: 32rem;
+  background: #DBF0FF;
+  margin: 2rem;
+  text-align: center;
+}
+
+.link:hover {
+  color: #8F750E;
+  cursor: pointer;
+}
+
+.thumbnail {
+  padding: 2rem;
+  width: auto;
+}
+.movie-poster {
+  display: block;
+  margin: 10px auto;
+}
+
+.m-label {
+  font-weight: 700;
+}
+
+.dark {
+  background-color: #354359;
+  color: #DBF0FF;
+}
+.registration-view {
+  background-color: #DBF0FF;
+}
+
+.dark {
+  background-color: #354359;
+  color: #DBF0FF;
 }
 
 /*# sourceMappingURL=/src.78399e21.css.map */
