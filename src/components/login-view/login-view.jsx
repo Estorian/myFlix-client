@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import './login-view.scss';
+import { Link } from 'react-router-dom';
 
 export function LoginView(props) {
     const [username, setUsername] = useState('');
@@ -10,14 +13,22 @@ export function LoginView(props) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(username, password);
         //Request to server for authentication
-        //then call props.onLoggedIn(username)
-        props.onLoggedIn(username);
+        axios.post('https://estorians-movie-api.herokuapp.com/login', {
+            Username: username,
+            Password: password
+            })
+            .then(response => {
+                const data = response.data;
+                props.onLoggedIn(data);
+            })
+            .catch(e => {
+                console.log('No such user')
+            });
     }
 
     const register = () => {
-        props.register();
+        window.open('/register', '_self');
     }
 
     return (
@@ -40,7 +51,7 @@ export function LoginView(props) {
             </Modal.Body>
             <Modal.Footer className="login-view">
                 <Button type="button" className="dark" onClick={handleSubmit}>Submit</Button>
-                <Button type="button" variant="link" onClick={register}>Register</Button>
+                <Button type="button" variant="link" onClick={props.register}>Register</Button>
             </Modal.Footer>
         </Modal.Dialog>
     )

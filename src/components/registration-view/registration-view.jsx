@@ -3,6 +3,8 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import './registration-view.scss';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 export function RegistrationView(props) {
 
@@ -10,11 +12,22 @@ export function RegistrationView(props) {
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleRegister = (e) => {
         e.preventDefault();
         console.log(username, password, email);
-        //Request to server for registration of new user
-        props.onLoggedIn(username);
+        axios.post('https://estorians-movie-api.herokuapp.com/register', {
+            username: username,
+            password: password,
+            email: email
+        })
+            .then(response => {
+                const data = response.data;
+                console.log(data);
+                window.open('/', '_self');
+            })
+            .catch(e => {
+                console.log("Error registering user: " + e)
+            });
     }
 
     const returnHome = () => {
@@ -44,8 +57,8 @@ export function RegistrationView(props) {
                 </Form>
             </Modal.Body>
             <Modal.Footer className="registration-view">
-                <Button type="button" className="dark" onClick={handleSubmit}>Register</Button>
-                <Button type="button" variant="link" onClick={returnHome}>Login</Button>
+                <Button type="button" className="dark" onClick={handleRegister}>Register</Button>
+                    <Button type="button" variant="link" onClick={returnHome}>Login</Button>
             </Modal.Footer>
         </Modal.Dialog>
     )

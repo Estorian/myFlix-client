@@ -3,13 +3,14 @@
     "",
     "\\src",
     "\\src\\components",
-    "\\src\\components\\login-view",
-    "\\src\\components\\main-view",
+    "\\src\\components\\director-view",
+    "\\src\\components\\genre-view",
     "\\src\\components\\movie-card",
     "\\src\\components\\movie-view",
     "\\src\\components\\nav-menu",
+    "\\src\\components\\profile-view",
     "\\src\\components\\registration-view"
   ],
-  "SelectedNode": "\\src\\components\\movie-card\\movie-card.scss",
+  "SelectedNode": "\\src\\components\\nav-menu\\nav-menu.jsx",
   "PreviewInSolutionExplorer": false
 }
