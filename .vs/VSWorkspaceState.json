@@ -2,8 +2,14 @@
   "ExpandedNodes": [
     "",
     "\\src",
-    "\\src\\components"
+    "\\src\\components",
+    "\\src\\components\\login-view",
+    "\\src\\components\\main-view",
+    "\\src\\components\\movie-card",
+    "\\src\\components\\movie-view",
+    "\\src\\components\\nav-menu",
+    "\\src\\components\\registration-view"
   ],
-  "SelectedNode": "\\package.json",
+  "SelectedNode": "\\src\\components\\movie-card\\movie-card.scss",
   "PreviewInSolutionExplorer": false
 }
