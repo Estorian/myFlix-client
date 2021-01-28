@@ -13,7 +13,6 @@ export function LoginView(props) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        //Request to server for authentication
         axios.post('https://estorians-movie-api.herokuapp.com/login', {
             Username: username,
             Password: password
@@ -23,7 +22,8 @@ export function LoginView(props) {
                 props.onLoggedIn(data);
             })
             .catch(e => {
-                console.log('No such user')
+                alert("Username or Password was incorrect.");
+                console.log(e);
             });
     }
 

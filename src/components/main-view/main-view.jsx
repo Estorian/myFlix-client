@@ -15,6 +15,7 @@ import { NavMenu } from '../nav-menu/nav-menu';
 
 import Row from 'react-bootstrap/Row';
 import Container from 'react-bootstrap/Container';
+import Spinner from 'react-bootstrap/Spinner';
 
 export class MainView extends React.Component {
 
@@ -52,15 +53,14 @@ export class MainView extends React.Component {
     }
 
     onLoggedIn(authData) {
-        console.log(authData);
         this.setState({
             user: authData.user.username,
             newUser: null,
-            userData: authData.user
         });
 
         localStorage.setItem('token', authData.token);
         localStorage.setItem('user', authData.user.username);
+        console.log(authData);
         this.getMovies(authData.token);
     }
 
@@ -68,9 +68,27 @@ export class MainView extends React.Component {
         console.log(localStorage.getItem('user') + " logged out.")
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('userInfo');
         this.setState({
             user: null
         })
+    }
+
+    makeFavorite(movie) {
+        let user = localStorage.getItem('user');
+        let token = localStorage.getItem('token');
+        console.log(movie);
+        console.log(movie._id);
+        let requestURL = 'https://estorians-movie-api.herokuapp.com/users/' + user + '/movies/' + movie._id;
+        console.log(requestURL);
+        axios.put(requestURL, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(response => {
+                console.log("Movie added to favorites successfully:");
+                console.log(response.data);
+            })
+            .catch(err => { console.log(err) });
     }
 
     getMovies(token) {
@@ -96,50 +114,44 @@ export class MainView extends React.Component {
     }
 
     render() {
-        const { movies, user, newUser, userData } = this.state;
-        let cards = movies.map(movie => <MovieCard key={movie._id} movie={movie} />);
-
+        const { movies, user, newUser } = this.state;
 
         if (newUser) return <RegistrationView returnHome={() => this.returnHome()} />;
 
         if (!user) return <LoginView register={() => this.register()} onLoggedIn={user => this.onLoggedIn(user)} />;
 
-        if (!movies) return <div className="main-view" />;
+        if (!movies) return <Spinner animation="grow" variant="light" className="main-view" />;
 
         return (
             <Router>
                 <div className="main-view">
-                    <Route exact path="/">
+                    <Route exact path="/" render={() =>
                         <div>
-                            <NavMenu onLogout={() => this.onLogout()} user={this.user}/>
+                            <NavMenu onLogout={() => this.onLogout()} user={localStorage.getItem('user')} />
                             <div className="text-center display-1" style={{ padding: 12, color: '#DBF0FF' }}>Estorian's Flix</div>
                             <Container fluid>
                                 <Row>
-                                    {cards}
+                                    {movies.map(movie => <MovieCard key={movie._id} movie={movie} buttonFunction={() => this.makeFavorite(movie) } buttonName="Favorite" />)}
                                 </Row>
                             </Container>
                         </div>
-                    </Route>
+                    } />
 
-                    <Route exact path="/movies/:movieId" render={({ match }) => {
-                        if (!movies) return <div className="main-view" />;
+                    <Route exact path="/movies/:movieId" render={({ match }) => 
                         <MovieView movie={movies.find(m => m._id === match.params.movieId)} />
-                    }} />
+                    } />
 
-                    <Route exact path="/directors/:name" render={({ match }) => {
-                        if (!movies) return <div className="main-view" />;
+                    <Route exact path="/directors/:name" render={({ match }) => 
                         <DirectorView director={movies.find(m => m.Director.Name === match.params.name).Director} />
-                    }} />
+                    } />
 
-                    <Route exact path="/genres/:name" render={({ match }) => {
-                        if (!movies) return <div className="main-view" />;
+                    <Route exact path="/genres/:name" render={({ match }) => 
                         <GenreView genre={movies.find(m => m.Genre.Name === match.params.name).Genre} />
-                    }} />
+                    } />
 
-                    <Route exact path="/users/:username" render={() => {
-                        if (!movies) return <div className="main-view" />;
-                        <ProfileView user={userData} />
-                    }} />
+                    <Route exact path="/users/:username" render={() =>
+                        <ProfileView user={localStorage.getItem('user')} movies={movies}/>
+                    } />
 
 
                 {/*

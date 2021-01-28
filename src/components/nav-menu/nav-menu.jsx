@@ -11,7 +11,6 @@ import { Link } from 'react-router-dom';
 export function NavMenu(props) {
     const onLogout = props.onLogout;
     const user = props.user;
-    console.log(user);
     const profileURL = '/users/' + user;
 
     return (

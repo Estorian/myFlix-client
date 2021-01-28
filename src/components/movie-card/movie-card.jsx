@@ -8,7 +8,7 @@ import { Col } from 'react-bootstrap';
 
 export class MovieCard extends React.Component {
     render() {
-        const { movie, onClick } = this.props;
+        const { movie, buttonFunction, buttonName } = this.props;
         const abbrDescription = movie.Description.substring(0, 100) + '...';
 
         return (
@@ -22,6 +22,7 @@ export class MovieCard extends React.Component {
                                 <Button variant="link">Read more</Button>
                             </Link>
                         </Card.Text>
+                        <Button variant="primary" onClick={buttonFunction}>{buttonName}</Button>
                     </Card.Body>
                 </Card>
             </Col>
@@ -36,5 +37,4 @@ MovieCard.propTypes = {
         Description: PropTypes.string.isRequired,
         ImageURL: PropTypes.string.isRequired
     }).isRequired,
-    onClick: PropTypes.func.isRequired
 };
