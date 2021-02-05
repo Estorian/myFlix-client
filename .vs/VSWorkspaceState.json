@@ -3,14 +3,8 @@
     "",
     "\\src",
     "\\src\\components",
-    "\\src\\components\\login-view",
-    "\\src\\components\\main-view",
-    "\\src\\components\\movie-card",
-    "\\src\\components\\movie-view",
-    "\\src\\components\\nav-menu",
-    "\\src\\components\\profile-view",
-    "\\src\\components\\registration-view"
+    "\\src\\components\\visibility-filter-input"
   ],
-  "SelectedNode": "\\src\\components\\login-view\\login-view.jsx",
+  "SelectedNode": "\\src\\reducers",
   "PreviewInSolutionExplorer": false
 }

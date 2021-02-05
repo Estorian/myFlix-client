@@ -1,7 +1,13 @@
 import React from 'react';
 import axios from 'axios';
 
+import { connect } from 'react-redux';
+
 import { BrowserRouter as Router, Route } from 'react-router-dom';
+
+import { setMovies } from '../../actions/actions';
+
+import MoviesList from '../movies-list/movies-list';
 
 import './main-view.scss';
 import { LoginView } from '../login-view/login-view';
@@ -97,11 +103,16 @@ export class MainView extends React.Component {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(response => {
+                console.log(response.data);
+                this.props.setMovies(response.data);
+                console.log('props', this.props);
+                console.log('state', this.state);
+                /*
                 this.setState({
                     movies: response.data
                 });
                 console.log("Movies loaded successfully");
-                console.log(response.data);
+                console.log(response.data);*/
             })
             .catch(err => { console.log(err) });
     }
@@ -114,13 +125,15 @@ export class MainView extends React.Component {
     }
 
     render() {
-        const { movies, user, newUser } = this.state;
+        let { movies } = this.props;
+        console.log("rendering movies:", movies);
+        const { user, newUser } = this.state;
 
         if (newUser) return <RegistrationView returnHome={() => this.returnHome()} />;
 
         if (!user) return <LoginView register={() => this.register()} onLoggedIn={user => this.onLoggedIn(user)} />;
 
-        if (!movies) return <Spinner animation="grow" variant="light" className="main-view" />;
+        if (!movies[0]) return <Spinner animation="grow" variant="light" className="main-view mx-auto my-auto" />;
 
         return (
             <Router>
@@ -129,11 +142,14 @@ export class MainView extends React.Component {
                         <div>
                             <NavMenu onLogout={() => this.onLogout()} user={localStorage.getItem('user')} />
                             <div className="text-center display-1" style={{ padding: 12, color: '#DBF0FF' }}>Estorian's Flix</div>
+                            <MoviesList movies={movies} />
+                            {/*
                             <Container fluid>
                                 <Row>
                                     {movies.map(movie => <MovieCard key={movie._id} movie={movie} buttonFunction={() => this.makeFavorite(movie) } buttonName="Favorite" />)}
                                 </Row>
                             </Container>
+                            */}
                         </div>
                     } />
 
@@ -166,3 +182,11 @@ export class MainView extends React.Component {
         );
     }
 }
+
+let mapStateToProps = state => {
+    return {
+        movies: state.movies
+    }
+}
+
+export default connect(mapStateToProps, { setMovies } )(MainView);

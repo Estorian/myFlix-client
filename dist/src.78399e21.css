@@ -3,14 +3,6 @@ body {
   font-family: "Lato", sans-serif;
   background: #354359;
 }
-.login-view {
-  background-color: #DBF0FF;
-}
-
-.dark {
-  background-color: #354359;
-  color: #DBF0FF;
-}
 .movie-card {
   width: 20rem;
   height: 35rem;
@@ -30,6 +22,14 @@ body {
 .thumbnail {
   padding: 2rem;
   width: auto;
+}
+.login-view {
+  background-color: #DBF0FF;
+}
+
+.dark {
+  background-color: #354359;
+  color: #DBF0FF;
 }
 .movie-poster {
   display: block;
