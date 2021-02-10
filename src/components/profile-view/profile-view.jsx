@@ -1,8 +1,12 @@
 import React from 'react';
+import { connect } from 'react-redux';
+
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import './profile-view.scss';
+
+import { setMovies, deleteFavorite, setUser, setFavorites } from '../../actions/actions';
 import { MovieCard } from '../movie-card/movie-card';
 import Modal from 'react-bootstrap/Modal';
 import axios from 'axios';
@@ -19,7 +23,7 @@ export class ProfileView extends React.Component {
         this.state = {
             user: localStorage.getItem('user'),
             userData: null,
-            favorites: [],
+            favoriteFullMovies: [],
             showWarning: false,
             showEdit: false,
             showLogin: false,
@@ -79,49 +83,88 @@ export class ProfileView extends React.Component {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(response => {
+
+
                 this.setState({
                     userData: response.data
                 })
+                this.getMovies(token);
                 console.log(`User ${user}'s information was successfully loaded.`);
+            })
+            .catch(err => { console.log(err) });
+    }
+
+    getMovies(token) {
+        console.log("Loading movies from API...");
+        axios.get('https://estorians-movie-api.herokuapp.com/movies', {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(response => {
+                console.log(response.data);
+                this.props.setMovies(response.data);
                 this.getFavorites();
+                /*
+                this.setState({
+                    movies: response.data
+                });
+                console.log("Movies loaded successfully");
+                console.log(response.data);*/
             })
             .catch(err => { console.log(err) });
     }
 
     getFavorites() {
-        let { movies, user } = this.props;
+        /* let { movies, user } = this.props;
         console.log('started getFavorites(). Movies: ');
         console.log(movies);
         let { userData }= this.state;
         console.log(userData);
         let favIDs = userData.favoriteMovies;
-        console.log(favIDs);
-        if (favIDs.length > 0) {
-            for (let i = 0; i < (favIDs.length); i++) {
-                let newFav = movies.find(m => m._id === favIDs[i]);
-                this.setState({
-                    favorites: this.state.favorites.concat(newFav)
-                });
+        console.log(favIDs); */
+        let getFaves = this.state.favoriteFullMovies;
+        if (!getFaves[0]) {
+            let favoriteIDs = this.props.user.favoriteMovies;
+            let movies = this.props.movies;
+            setFavorites(favoriteIDs);
+            for (let i = 0; i < favoriteIDs.length; i++) {     //for each fave ID
+                for (let j = 0; j < movies.length; j++) {   // look at each movie
+                    if (movies[j]._id == favoriteIDs[i]) {     // if the ids match
+                        this.setState({
+                            favoriteFullMovies: this.state.favoriteFullMovies.concat(movies[j])
+                        });
+                    }
+                }
             }
-            console.log(this.state.favorites);
+            console.log('ffm: ', this.state.favoriteFullMovies);
+            if (this.props.favorites.length > 0) {
+                /*for (let i = 0; i < (favIDs.length); i++) {
+                    let newFav = movies.find(m => m._id === favIDs[i]);
+                    this.setState({
+                        favorites: this.state.favorites.concat(newFav)
+                    });
+                }*/
+                console.log('Favorites: ', this.props.favorites);
+            }
+            else console.log('no favorite movies');
         }
-        else console.log('no favorite movies');
     }
 
     removeFavorite(movie) {
         let movieID = movie._id;
+        console.log(movie.Title, 'to be removed');
         let user = localStorage.getItem('user');
         let token = localStorage.getItem('token');
         let removeURL = 'https://estorians-movie-api.herokuapp.com/users/' + user + '/movies/' + movieID + '/remove';
         axios.delete(removeURL, {
             headers: { Authorization: `Bearer ${token}` }
         })
-            .then(() => { alert(`${movie.Title} was removed from your favorites`) })
+            .then(() => {
+                alert(`${movie.Title} was removed from your favorites`);
+                deleteFavorite(movieID);
+                let refreshURL = '/users/' + user;
+                window.open(refreshURL, '_self');
+            })
             .catch(err => { console.log(err) });
-    }
-
-    updateUserInfo() {
-
     }
 
     unregister() {
@@ -147,6 +190,9 @@ export class ProfileView extends React.Component {
         console.log(localStorage.getItem('user') + " logged out.")
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        setUser([]);
+        setFavorites([]);
+        setMovies([]);
         this.setState({
             user: null
         })
@@ -195,8 +241,9 @@ export class ProfileView extends React.Component {
     }
 
     render() {
-        let { userData, favorites, user, showWarning, showEdit, showLogin, doubleCheck } = this.state;
+        let { user, showWarning, showEdit, showLogin, doubleCheck, favoriteFullMovies } = this.state;
 
+        let userData = this.props.user;
 
         const handleCloseWarning = () => this.setShowWarning(false);
         const handleShowWarning = () => {
@@ -211,9 +258,7 @@ export class ProfileView extends React.Component {
 
         const hideLogin = () => this.setShowLogin(false);
 
-
-        if (favorites == []) console.log("No favorites for this user were loaded.");
-        let cards = favorites.map(movie => <MovieCard key={movie._id} movie={movie} buttonFunction={() => this.removeFavorite(movie) } buttonName="Remove" />)
+        let cards = favoriteFullMovies.map(movie => <MovieCard key={movie._id} movie={movie} buttonFunction={() => this.removeFavorite(movie) } buttonName="Remove" />)
 
         if (!userData) return <div className="profile-view"> <Spinner animation="border" variant="light" /> </div>;
 
@@ -336,3 +381,14 @@ export class ProfileView extends React.Component {
         )
     }
 }
+
+
+let mapStateToProps = state => {
+    return {
+        movies: state.movies,
+        user: state.user,
+        favorites: state.favorites
+    }
+}
+
+export default connect(mapStateToProps, { setMovies, deleteFavorite, setUser })(ProfileView);

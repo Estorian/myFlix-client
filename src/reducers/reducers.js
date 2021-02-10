@@ -21,7 +21,7 @@ function movies(state = [], action) {
     }
 }
 
-function user(state = {}, action) {
+function user(state = [], action) {
     switch (action.type) {
         case SET_USER:
             return action.value; 
@@ -31,7 +31,7 @@ function user(state = {}, action) {
     }
 }
 
-function favorites(state = [], action) {
+function favorites(state = [], action) { //all favorites must be an id ONLY
     switch (action.type) {
         case SET_FAVORITES:
             return action.value;
@@ -42,7 +42,10 @@ function favorites(state = [], action) {
             ];
 
         case DELETE_FAVORITE:
-            return state.filter(movieID => (movieID !== action.value));
+            let newState = state.filter(movieID => (movieID !== action.value));
+            console.log('state: ', state);
+            console.log('newState: ', newState);
+            return newState;
 
         default:
             return state;

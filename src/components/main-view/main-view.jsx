@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { setMovies } from '../../actions/actions';
+import { setMovies, setUser, setFavorites } from '../../actions/actions';
 
 import MoviesList from '../movies-list/movies-list';
 
@@ -14,13 +14,10 @@ import { LoginView } from '../login-view/login-view';
 import { MovieCard } from '../movie-card/movie-card';
 import { MovieView } from '../movie-view/movie-view';
 import { RegistrationView } from '../registration-view/registration-view';
-import { ProfileView } from '../profile-view/profile-view';
+import ProfileView from '../profile-view/profile-view';
 import { GenreView } from '../genre-view/genre-view';
 import { DirectorView } from '../director-view/director-view';
-import { NavMenu } from '../nav-menu/nav-menu';
-
-import Row from 'react-bootstrap/Row';
-import Container from 'react-bootstrap/Container';
+import NavMenu from '../nav-menu/nav-menu';
 import Spinner from 'react-bootstrap/Spinner';
 
 export class MainView extends React.Component {
@@ -38,10 +35,23 @@ export class MainView extends React.Component {
     componentDidMount() {
         let accessToken = localStorage.getItem('token');
         if (accessToken !== null) {
+            let user = localStorage.getItem('user');
             this.setState({
                 user: localStorage.getItem('user')
-            });
+            })
+            
             this.getMovies(accessToken);
+            // Getting user info for already logged in users.
+            let userURL = 'https://estorians-movie-api.herokuapp.com/users/' + user;
+            axios.get(userURL, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            })
+                .then(response => {
+                    this.props.setUser(response.data);
+                    console.log('User loaded to redux state.');
+                    this.getFavorites();
+                })
+                .catch(err => { console.log(err) });
         }
 
     }
@@ -59,8 +69,9 @@ export class MainView extends React.Component {
     }
 
     onLoggedIn(authData) {
+        setUser(authData.user);
+        console.log(this.props.user, 'logged in');
         this.setState({
-            user: authData.user.username,
             newUser: null,
         });
 
@@ -78,23 +89,25 @@ export class MainView extends React.Component {
         this.setState({
             user: null
         })
+        setUser([]);
     }
 
-    makeFavorite(movie) {
-        let user = localStorage.getItem('user');
-        let token = localStorage.getItem('token');
-        console.log(movie);
-        console.log(movie._id);
-        let requestURL = 'https://estorians-movie-api.herokuapp.com/users/' + user + '/movies/' + movie._id;
-        console.log(requestURL);
-        axios.put(requestURL, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-            .then(response => {
-                console.log("Movie added to favorites successfully:");
-                console.log(response.data);
-            })
-            .catch(err => { console.log(err) });
+    getFavorites() {
+        this.props.setFavorites(this.props.user.favoriteMovies);
+        console.log('faves: ', this.props.favorites);
+        /*let favesList = [];
+        let favesIDs = this.props.user.favoriteMovies;
+        console.log('favesIDs: ', favesIDs);
+        let movies = this.props.movies;
+        for (let i = 0; i < favesIDs.length; i++) {     //for each fave ID
+            for (let j = 0; j < movies.length; j++) {   // look at each movie
+                if (movies[j]._id == favesIDs[i]) {     // if the ids match
+                    favesList.push(movies[j]._id);          //add the movie to favesList
+                }
+            }
+        }
+        console.log('favesList: ', favesList);
+        this.props.setFavorites(favesList);*/
     }
 
     getMovies(token) {
@@ -105,8 +118,7 @@ export class MainView extends React.Component {
             .then(response => {
                 console.log(response.data);
                 this.props.setMovies(response.data);
-                console.log('props', this.props);
-                console.log('state', this.state);
+                this.getFavorites();
                 /*
                 this.setState({
                     movies: response.data
@@ -125,13 +137,12 @@ export class MainView extends React.Component {
     }
 
     render() {
-        let { movies } = this.props;
-        console.log("rendering movies:", movies);
-        const { user, newUser } = this.state;
+        let { movies, user } = this.props;
+        const { newUser } = this.state;
 
         if (newUser) return <RegistrationView returnHome={() => this.returnHome()} />;
 
-        if (!user) return <LoginView register={() => this.register()} onLoggedIn={user => this.onLoggedIn(user)} />;
+        if (!localStorage.getItem('user')) return <LoginView register={() => this.register()} onLoggedIn={user => this.onLoggedIn(user)} />;
 
         if (!movies[0]) return <Spinner animation="grow" variant="light" className="main-view mx-auto my-auto" />;
 
@@ -185,8 +196,10 @@ export class MainView extends React.Component {
 
 let mapStateToProps = state => {
     return {
-        movies: state.movies
+        movies: state.movies,
+        user: state.user,
+        favorites: state.favorites
     }
 }
 
-export default connect(mapStateToProps, { setMovies } )(MainView);
+export default connect(mapStateToProps, { setMovies, setFavorites, setUser })(MainView);

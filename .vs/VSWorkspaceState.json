@@ -2,9 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\src",
+    "\\src\\actions",
     "\\src\\components",
-    "\\src\\components\\visibility-filter-input"
+    "\\src\\components\\visibility-filter-input",
+    "\\src\\reducers"
   ],
-  "SelectedNode": "\\src\\reducers",
+  "SelectedNode": "\\src\\actions\\actions.js",
   "PreviewInSolutionExplorer": false
 }
