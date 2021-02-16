@@ -1,16 +1,20 @@
 import React from 'react';
-
+import { connect } from 'react-redux';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import Form from 'react-bootstrap/Form';
-import FormControl from 'react-bootstrap/FormControl';
+import VisibilityFilterInput from '../visibility-filter-input/visibility-filter-input';
+
 import Button from 'react-bootstrap/Button';
 import { Link } from 'react-router-dom';
 
+const mapStateToProps = state => {
+    const { visibilityFilter } = state;
+    return { visibilityFilter };
+};
+
 export function NavMenu(props) {
-    const onLogout = props.onLogout;
-    const user = props.user;
+    const { onLogout, visibilityFilter, user } = props;
     const profileURL = '/users/' + user;
 
     return (
@@ -31,10 +35,11 @@ export function NavMenu(props) {
                     <Button variant="link" onClick={ onLogout }>Logout</Button>
                 </Nav>
                 <Form inline>
-                    <FormControl type="text" placeholder="Movie Title" className="mr-sm-2" />
-                    <Button variant="outline-light">Search</Button>
+                    <VisibilityFilterInput visibilityFilter={visibilityFilter} />
                 </Form>
             </Navbar.Collapse>
         </Navbar>
     );
 }
+
+export default connect(mapStateToProps)(NavMenu);

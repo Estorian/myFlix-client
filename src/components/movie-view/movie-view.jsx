@@ -4,6 +4,9 @@ import Button from 'react-bootstrap/Button';
 import './movie-view.scss';
 import { Link } from "react-router-dom";
 import axios from 'axios';
+import { connect } from 'react-redux';
+import { addFavorite } from '../../actions/actions';
+import { makeFavorite } from '../../utilities';
 
 export class MovieView extends React.Component {
     constructor() {
@@ -11,25 +14,6 @@ export class MovieView extends React.Component {
 
         this.state = {};
     }
-
-    makeFavorite() {
-        let user = localStorage.getItem('user');
-        let token = localStorage.getItem('token');
-        let movie = this.props;
-        console.log(movie);
-        console.log(movie.movie._id);
-        let requestURL = 'https://estorians-movie-api.herokuapp.com/users/' + user + '/movies/' + movie.movie._id;
-        console.log(requestURL);
-        axios.put(requestURL, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-            .then(response => {
-                console.log("Movie added to favorites successfully:");
-                console.log(response.data);
-            })
-            .catch(err => { console.log(err) });
-    }
-
 
     render() {
         let { movie } = this.props;
@@ -70,7 +54,15 @@ export class MovieView extends React.Component {
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button className="dark" onClick={() => this.makeFavorite() }>Add to my Favorites</Button>
+                    <Button
+                        className="dark"
+                        onClick={() => {
+                            makeFavorite(movie, this.props).then(() => {
+                                this.props.history.push('/');
+                            })
+                        }
+                        }
+                        >Add to my Favorites</Button>
                     <Link to={'/'}>
                         <Button className="dark">Back to Movies</Button>
                     </Link>
@@ -79,3 +71,13 @@ export class MovieView extends React.Component {
         )
     }
 }
+
+
+let mapStateToProps = state => {
+    return {
+        movies: state.movies,
+        user: state.user
+    }
+}
+
+export default connect(mapStateToProps, { addFavorite })(MovieView);

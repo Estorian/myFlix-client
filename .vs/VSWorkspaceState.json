@@ -2,15 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\src",
+    "\\src\\actions",
     "\\src\\components",
-    "\\src\\components\\login-view",
-    "\\src\\components\\main-view",
-    "\\src\\components\\movie-card",
     "\\src\\components\\movie-view",
-    "\\src\\components\\nav-menu",
-    "\\src\\components\\profile-view",
-    "\\src\\components\\registration-view"
+    "\\src\\reducers"
   ],
-  "SelectedNode": "\\src\\components\\login-view\\login-view.jsx",
+  "SelectedNode": "\\src\\actions\\actions.js",
   "PreviewInSolutionExplorer": false
 }

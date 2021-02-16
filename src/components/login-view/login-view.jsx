@@ -5,7 +5,6 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import './login-view.scss';
-import { Link } from 'react-router-dom';
 
 export function LoginView(props) {
     const [username, setUsername] = useState('');
@@ -18,17 +17,14 @@ export function LoginView(props) {
             Password: password
             })
             .then(response => {
+                console.log('Login data: ', response.data);
                 const data = response.data;
                 props.onLoggedIn(data);
             })
             .catch(e => {
                 alert("Username or Password was incorrect.");
-                console.log(e);
+                console.error(e);
             });
-    }
-
-    const register = () => {
-        window.open('/register', '_self');
     }
 
     return (
