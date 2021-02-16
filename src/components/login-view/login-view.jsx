@@ -23,12 +23,8 @@ export function LoginView(props) {
             })
             .catch(e => {
                 alert("Username or Password was incorrect.");
-                console.log(e);
+                console.error(e);
             });
-    }
-
-    const register = () => {
-        window.open('/register', '_self');
     }
 
     return (

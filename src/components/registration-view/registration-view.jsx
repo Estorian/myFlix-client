@@ -4,7 +4,6 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import './registration-view.scss';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 
 export function RegistrationView(props) {
 
@@ -18,25 +17,22 @@ export function RegistrationView(props) {
         else if (!email.includes("@") || !email.includes(".")) { alert("Please use a valid email address.") }
         else if (password.length < 1) { alert("Password is required.") }
         else {
-            console.log(username, password, email);
-            axios.post('https://estorians-movie-api.herokuapp.com/users', {
-                username: username,
-                password: password,
-                email: email
+            axios({
+                method: 'post',
+                url: 'https://estorians-movie-api.herokuapp.com/users',
+                data: {
+                    username: username,
+                    password: password,
+                    email: email
+                }
+            }).then(() => {
+                alert(`New user, ${username}, successfully registered!`);
+                props.returnHome();
+            }).catch(e => {
+                alert(`There was an error registering. Please try again later.`);
+                console.error(e);
             })
-                .then(response => {
-                    const data = response.data;
-                    console.log(data);
-                    window.open('/', '_self');
-                })
-                .catch(e => {
-                    console.log("Error registering user: " + e)
-                });
         }
-    }
-
-    const returnHome = () => {
-        props.returnHome();
     }
 
     return (
@@ -69,7 +65,7 @@ export function RegistrationView(props) {
             </Modal.Body>
             <Modal.Footer className="registration-view">
                 <Button type="button" className="dark" onClick={handleRegister}>Register</Button>
-                    <Button type="button" variant="link" onClick={returnHome}>Login</Button>
+                <Button type="button" variant="link" onClick={() => props.returnHome()}>Login</Button>
             </Modal.Footer>
         </Modal.Dialog>
     )

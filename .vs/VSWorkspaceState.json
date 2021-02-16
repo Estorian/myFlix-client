@@ -4,7 +4,7 @@
     "\\src",
     "\\src\\actions",
     "\\src\\components",
-    "\\src\\components\\visibility-filter-input",
+    "\\src\\components\\movie-view",
     "\\src\\reducers"
   ],
   "SelectedNode": "\\src\\actions\\actions.js",

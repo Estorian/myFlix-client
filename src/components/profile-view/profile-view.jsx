@@ -7,6 +7,8 @@ import Row from 'react-bootstrap/Row';
 import './profile-view.scss';
 
 import { setMovies, deleteFavorite, setUser, setFavorites } from '../../actions/actions';
+import { getUserInfo, getMovies, onLogout } from '../../utilities';
+
 import { MovieCard } from '../movie-card/movie-card';
 import Modal from 'react-bootstrap/Modal';
 import axios from 'axios';
@@ -21,9 +23,6 @@ export class ProfileView extends React.Component {
         super();
 
         this.state = {
-            user: localStorage.getItem('user'),
-            userData: null,
-            favoriteFullMovies: [],
             showWarning: false,
             showEdit: false,
             showLogin: false,
@@ -36,10 +35,15 @@ export class ProfileView extends React.Component {
     }
 
     componentDidMount() {
-        let user = localStorage.getItem('user');
-        let token = localStorage.getItem('token');
-        if (user !== null) {
-            this.getUserData(token, user);
+        if (!this.props.user) {
+            getUserInfo().then(response => {
+                this.props.setUser(response.data);
+            })
+        }
+        if (!this.props.movies) {
+            getMovies()
+                .then(response => { this.props.setMovies(response.data); })
+                .then(() => { this.props.setFavorites(this.props.user.favoriteMovies) });
         }
     }
 
@@ -48,11 +52,14 @@ export class ProfileView extends React.Component {
         let password = this.state.password;
         let doubleCheck = this.state.doubleCheck;
         if (!doubleCheck) {
-            axios.post('https://estorians-movie-api.herokuapp.com/login', {
-                Username: username,
-                Password: password
-            })
-                .then(() => {
+            axios({
+                method: 'post',
+                url: `https://estorians-movie-api.herokuapp.com/login`,
+                data: {
+                    Username: username,
+                    Password: password
+                }
+            }).then(() => {
                     this.setState({
                         doubleCheck: true,
                         username: username,
@@ -61,110 +68,33 @@ export class ProfileView extends React.Component {
                     })
                 })
                 .catch(e => {
-                    console.log(e);
+                    console.error(e);
                     alert(`Login failed. Please try again. You have ${3 - this.state.lockout} more chances before you will be logged out.`);
                     this.setState({
                         lockoutCheck: this.state.lockoutCheck + 1
                     });
                     if (this.state.lockoutCheck > 4) {
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('user');
-                        window.open('/', '_self');
+                        onLogout(this.props);
                     }
 
                 })
-        }
-    }
-
-    getUserData(token, user) {
-        console.log("Getting user information");
-        let userURL = 'https://estorians-movie-api.herokuapp.com/users/' + user;
-        axios.get(userURL, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-            .then(response => {
-
-
-                this.setState({
-                    userData: response.data
-                })
-                this.getMovies(token);
-                console.log(`User ${user}'s information was successfully loaded.`);
-            })
-            .catch(err => { console.log(err) });
-    }
-
-    getMovies(token) {
-        console.log("Loading movies from API...");
-        axios.get('https://estorians-movie-api.herokuapp.com/movies', {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-            .then(response => {
-                console.log(response.data);
-                this.props.setMovies(response.data);
-                this.getFavorites();
-                /*
-                this.setState({
-                    movies: response.data
-                });
-                console.log("Movies loaded successfully");
-                console.log(response.data);*/
-            })
-            .catch(err => { console.log(err) });
-    }
-
-    getFavorites() {
-        /* let { movies, user } = this.props;
-        console.log('started getFavorites(). Movies: ');
-        console.log(movies);
-        let { userData }= this.state;
-        console.log(userData);
-        let favIDs = userData.favoriteMovies;
-        console.log(favIDs); */
-        let getFaves = this.state.favoriteFullMovies;
-        if (!getFaves[0]) {
-            let favoriteIDs = this.props.user.favoriteMovies;
-            let movies = this.props.movies;
-            setFavorites(favoriteIDs);
-            for (let i = 0; i < favoriteIDs.length; i++) {     //for each fave ID
-                for (let j = 0; j < movies.length; j++) {   // look at each movie
-                    if (movies[j]._id == favoriteIDs[i]) {     // if the ids match
-                        this.setState({
-                            favoriteFullMovies: this.state.favoriteFullMovies.concat(movies[j])
-                        });
-                    }
-                }
-            }
-            console.log('ffm: ', this.state.favoriteFullMovies);
-            if (this.props.favorites.length > 0) {
-                /*for (let i = 0; i < (favIDs.length); i++) {
-                    let newFav = movies.find(m => m._id === favIDs[i]);
-                    this.setState({
-                        favorites: this.state.favorites.concat(newFav)
-                    });
-                }*/
-                console.log('Favorites: ', this.props.favorites);
-            }
-            else console.log('no favorite movies');
         }
     }
 
     removeFavorite(movie) {
-        let movieID = movie._id;
-        console.log(movie.Title, 'to be removed');
         let user = localStorage.getItem('user');
         let token = localStorage.getItem('token');
-        let removeURL = 'https://estorians-movie-api.herokuapp.com/users/' + user + '/movies/' + movieID + '/remove';
-        axios.delete(removeURL, {
+        let movieID = movie._id;
+        this.props.deleteFavorite(movieID);
+        axios({
+            method: 'delete',
+            url: `https://estorians-movie-api.herokuapp.com/users/${user}/movies/${movieID}/remove`,
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(() => {
-                alert(`${movie.Title} was removed from your favorites`);
-                deleteFavorite(movieID);
-                let refreshURL = '/users/' + user;
-                window.open(refreshURL, '_self');
+                this.props.history.push(`/users/${user}`);
             })
-            .catch(err => { console.log(err) });
+            .catch((e) => { console.error(e) });
     }
 
     unregister() {
@@ -174,7 +104,7 @@ export class ProfileView extends React.Component {
         axios.delete(unRegisterURL, {
             headers: { Authorization: `Bearer ${token}` }
         })
-            .then(response => {
+            .then(() => {
                 alert(user + " has been unregistered.");
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
@@ -184,19 +114,6 @@ export class ProfileView extends React.Component {
                 console.log(e);
                 alert("There was an error unregistering. Please try again later.");
             });
-    }
-
-    onLogout() {
-        console.log(localStorage.getItem('user') + " logged out.")
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser([]);
-        setFavorites([]);
-        setMovies([]);
-        this.setState({
-            user: null
-        })
-        window.open('/', '_self');
     }
 
     setShowWarning(show) {
@@ -227,23 +144,27 @@ export class ProfileView extends React.Component {
         console.log(`Password: ${password}`);
         console.log(updateURL);
 
-        axios.put(updateURL, {
+        axios({
+            method: 'put',
+            url: `https://estorians-movie-api.herokuapp.com/users/${user}`,
             headers: { Authorization: `Bearer ${token}` },
-            username: username,
-            password: password,
-            email: email
-        })
-            .then(() => {
-                alert("Your information has been updated. Please login again.");
-                this.onLogout();
-            })
-            .catch(e => { console.log(e) });
+            data: {
+                username: username,
+                password: password,
+                email: email
+            }
+        }).then(() => {
+            alert("Your information has been updated. Please login again.");
+            this.onLogout();
+        }).catch(e => { console.error(e); });
     }
 
     render() {
-        let { user, showWarning, showEdit, showLogin, doubleCheck, favoriteFullMovies } = this.state;
+        let { showWarning, showEdit, showLogin, doubleCheck } = this.state;
 
-        let userData = this.props.user;
+        let { user, movies, favorites, visibilityFilter } = this.props;
+
+        let filteredMovies = movies;
 
         const handleCloseWarning = () => this.setShowWarning(false);
         const handleShowWarning = () => {
@@ -258,25 +179,39 @@ export class ProfileView extends React.Component {
 
         const hideLogin = () => this.setShowLogin(false);
 
-        let cards = favoriteFullMovies.map(movie => <MovieCard key={movie._id} movie={movie} buttonFunction={() => this.removeFavorite(movie) } buttonName="Remove" />)
+        if (!movies) return <Spinner
+            animation="grow"
+            variant="light"
+            className="main-view"
+            style={{ position: 'absolute', left: '50%', top: '50%' }}
+        />;
 
-        if (!userData) return <div className="profile-view"> <Spinner animation="border" variant="light" /> </div>;
+        if (!user) return <div className="profile-view"> <Spinner animation="border" variant="light" /> </div>;
+
+        if (visibilityFilter !== '') {
+            filteredMovies = movies.filter(m => m.Title.toLowerCase().includes(visibilityFilter.toLowerCase()));
+        }
+
+        let cards = filteredMovies
+            .filter(movie => (favorites.includes(movie._id)))
+            .map(movie => <MovieCard key={movie._id} movie={movie} buttonFunction={() => this.removeFavorite(movie)} buttonName="Remove" />)
+
 
         return (
             <div>
                 <NavMenu onLogout={() => this.onLogout()} user={localStorage.getItem('user')} />
                 <h1 className="text-center display-1" style={{ padding: 12, color: '#DBF0FF' }}>My Profile</h1>
-                <ListGroup style={{ margin: '20px'}}>
+                <ListGroup style={{ margin: '50px'}}>
                     <ListGroup.Item>
                     <div className="username">
                         <span className="label">Username: </span>
-                        <span className="value">{user}</span>
+                        <span className="value">{user.username}</span>
                         </div>
                     </ListGroup.Item>
                     <ListGroup.Item>
                     <div className="user-email">
                         <span className="label">Email: </span>
-                        <span className="value">{userData.email} </span>
+                        <span className="value">{user.email} </span>
 
                         </div>
                     </ListGroup.Item>
@@ -294,12 +229,14 @@ export class ProfileView extends React.Component {
                     </Container>
                 </div>
 
-                <div className="unregister">
+                <div className="text-center">
+                    <Link to={'/'}>
+                        <Button inline="true" className="dark">Back to Movies</Button>
+                    </Link>
+                </div>
+                <div className="unregister text-center">
                     <Button variant="link" onClick={handleShowWarning}>Unregister</Button>
                 </div>
-                <Link to={'/'} >
-                    <Button inline="true" className="dark">Back to Movies</Button>
-                </Link>
 
                 <Modal show={showWarning} onHide={handleCloseWarning}>
                     <Modal.Header closeButton>
@@ -309,8 +246,8 @@ export class ProfileView extends React.Component {
                         Unregistering will delete all user data. This cannot be undone. Are you sure you want to unregister?
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="warning" onClick={() => this.unregister()}>Unregister</Button>
                         <Button variant="primary" onClick={handleCloseWarning}>Cancel</Button>
+                        <Button className="mx-auto" variant="warning" onClick={() => this.unregister()}>Unregister</Button>
                     </Modal.Footer>
                 </Modal>
 
@@ -332,7 +269,7 @@ export class ProfileView extends React.Component {
                                 <Form.Label>Email</Form.Label>
                                 <Form.Control
                                     type="email"
-                                    placeholder={userData.email}
+                                    placeholder={user.email}
                                     value={this.state.email}
                                     onChange={e => this.setState({ email: e.target.value })}
                                 />
@@ -387,8 +324,9 @@ let mapStateToProps = state => {
     return {
         movies: state.movies,
         user: state.user,
-        favorites: state.favorites
+        favorites: state.favorites,
+        visibilityFilter: state.visibilityFilter
     }
 }
 
-export default connect(mapStateToProps, { setMovies, deleteFavorite, setUser })(ProfileView);
+export default connect(mapStateToProps, { setMovies, deleteFavorite, setUser, setFavorites })(ProfileView);

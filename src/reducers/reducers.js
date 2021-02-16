@@ -14,7 +14,6 @@ function visibilityFilter(state = '', action) {
 function movies(state = [], action) {
     switch (action.type) {
         case SET_MOVIES:
-            console.log(action);
             return action.value;
         default:
             return state;
@@ -43,8 +42,6 @@ function favorites(state = [], action) { //all favorites must be an id ONLY
 
         case DELETE_FAVORITE:
             let newState = state.filter(movieID => (movieID !== action.value));
-            console.log('state: ', state);
-            console.log('newState: ', newState);
             return newState;
 
         default:
